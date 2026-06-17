@@ -757,6 +757,110 @@
     }
   };
 
+  /* ============================================================
+     MUSIC  -  an ORIGINAL spy-tension riff, generated live with
+     WebAudio (no audio files, nothing copyrighted). It evokes the
+     genre's driving ostinato feel without copying any real theme.
+     Starts only on the first user tap and obeys the same mute toggle.
+     ============================================================ */
+  const music = {
+    on: false,
+    ctx: null,
+    master: null,
+    bpm: 100,
+    step: 0,
+    nextNoteTime: 0,
+    timerId: null,
+    ROOT: 55, // A1, in Hz
+    // 16 sixteenth-note steps. Values are semitones above the root; null = rest.
+    // This is an original pattern, not a transcription of any existing theme.
+    bass:  [0, null, 0, 0, 7, null, 0, 3, 0, null, 0, 0, 5, null, 3, 2],
+    stabs: [null, null, null, null, null, null, null, null, 12, null, null, null, null, null, 15, null],
+    hats:  [true, false, true, true, false, true, true, false, true, false, true, true, false, true, true, false],
+
+    freq(semi) { return this.ROOT * Math.pow(2, semi / 12); },
+
+    start(ctx) {
+      if (this.on || !ctx) return;
+      this.on = true;
+      this.ctx = ctx;
+      this.master = ctx.createGain();
+      this.master.gain.value = 0.0001;
+      this.master.connect(ctx.destination);
+      this.applyVolume();          // gentle fade-in (or stay silent if muted)
+      this.step = 0;
+      this.nextNoteTime = ctx.currentTime + 0.06;
+      this.scheduler();
+    },
+
+    applyVolume() {
+      if (!this.master) return;
+      const target = audio.muted ? 0.0001 : 0.11;
+      this.master.gain.setTargetAtTime(target, this.ctx.currentTime, 0.4);
+    },
+
+    scheduler() {
+      const sixteenth = 60 / this.bpm / 4;
+      // schedule everything due within a short lookahead window
+      while (this.nextNoteTime < this.ctx.currentTime + 0.12) {
+        this.playStep(this.step, this.nextNoteTime);
+        this.nextNoteTime += sixteenth;
+        this.step = (this.step + 1) % 16;
+      }
+      this.timerId = setTimeout(() => this.scheduler(), 25);
+    },
+
+    playStep(i, t) {
+      if (this.bass[i] !== null) this.playBass(this.freq(this.bass[i]), t);
+      if (this.stabs[i] !== null) this.playStab(this.freq(this.stabs[i] + 24), t);
+      if (this.hats[i]) this.playHat(t);
+    },
+
+    playBass(freq, t) {
+      const o = this.ctx.createOscillator();
+      const g = this.ctx.createGain();
+      const f = this.ctx.createBiquadFilter();
+      o.type = "sawtooth";
+      o.frequency.setValueAtTime(freq, t);
+      f.type = "lowpass";
+      f.frequency.setValueAtTime(430, t);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.65, t + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
+      o.connect(f).connect(g).connect(this.master);
+      o.start(t); o.stop(t + 0.2);
+    },
+
+    playStab(freq, t) {
+      // short minor cluster for suspense
+      [0, 3, 7].forEach((semi) => {
+        const o = this.ctx.createOscillator();
+        const g = this.ctx.createGain();
+        o.type = "square";
+        o.frequency.setValueAtTime(freq * Math.pow(2, semi / 12), t);
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(0.12, t + 0.005);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
+        o.connect(g).connect(this.master);
+        o.start(t); o.stop(t + 0.2);
+      });
+    },
+
+    playHat(t) {
+      const len = Math.floor(this.ctx.sampleRate * 0.03);
+      const buf = this.ctx.createBuffer(1, len, this.ctx.sampleRate);
+      const d = buf.getChannelData(0);
+      for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2);
+      const src = this.ctx.createBufferSource(); src.buffer = buf;
+      const hp = this.ctx.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 6000;
+      const g = this.ctx.createGain(); g.gain.value = 0.05;
+      src.connect(hp).connect(g).connect(this.master);
+      src.start(t);
+    },
+
+    setMuted() { this.applyVolume(); }
+  };
+
   const muteToggle = $("muteToggle");
   muteToggle.addEventListener("click", () => {
     audio.muted = !audio.muted;
@@ -764,6 +868,7 @@
     muteToggle.setAttribute("aria-label", audio.muted ? "Unmute sound" : "Mute sound");
     $("muteIcon").innerHTML = audio.muted ? "&#128263;" : "&#128266;";
     if (audio.ctx && audio.ctx.state === "suspended") audio.ctx.resume();
+    music.setMuted();   // mute toggle controls the background riff too
   });
 
   /* ============================================================
@@ -779,6 +884,7 @@
     audio.init();               // first user gesture -> safe to enable audio
     if (audio.ctx && audio.ctx.state === "suspended") audio.ctx.resume();
     audio.whoosh();
+    music.start(audio.ctx);     // begin the looping background riff (obeys mute)
 
     envelope.classList.add("is-opening");
     $("tapHint").style.display = "none";
