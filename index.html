@@ -4,8 +4,8 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <meta name="theme-color" content="#0d0b08" />
-<title>Mission Possible 2027 — Your Mission Briefing</title>
-<meta name="description" content="A classified briefing for Mission Possible 2027 (16–22 January 2027). Tap to open." />
+<title>Mission Possible 2027 - Your Mission Briefing</title>
+<meta name="description" content="A classified briefing for Mission Possible 2027 (16-22 January 2027). Tap to open." />
 
 <!-- Google Fonts (only external dependency) -->
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -14,7 +14,7 @@
 
 <style>
   /* ============================================================
-     MISSION POSSIBLE 2027 — single-file spy briefing
+     MISSION POSSIBLE 2027 - single-file spy briefing
      ============================================================ */
 
   :root {
@@ -39,7 +39,8 @@
 
   body {
     margin: 0;
-    min-height: 100svh;
+    min-height: 100vh;       /* fallback for older browsers */
+    min-height: 100dvh;      /* fill the visible viewport, adjusting to browser chrome */
     background:
       radial-gradient(120% 90% at 50% -10%, #1d160b 0%, var(--bg-1) 40%, var(--bg-0) 100%);
     color: var(--paper);
@@ -102,7 +103,7 @@
   }
 
   /* =====================================================
-     SCREEN 1 — sealed envelope
+     SCREEN 1 - sealed envelope
      ===================================================== */
   .tap-hint {
     margin-top: 1.6rem;
@@ -254,7 +255,7 @@
   .envelope.is-opening .env-letter { transform: translateY(-46%); opacity: 1; }
 
   /* =====================================================
-     SCREEN 2 — the dossier / briefing
+     SCREEN 2 - the dossier / briefing
      ===================================================== */
   .dossier {
     position: relative;
@@ -336,8 +337,10 @@
     opacity: 0;
     transform: translateY(8px);
     transition: opacity 0.5s ease, transform 0.5s ease;
+    /* not interactive until revealed (belt-and-braces with the inert attribute) */
+    pointer-events: none;
   }
-  .actions.is-revealed { opacity: 1; transform: none; }
+  .actions.is-revealed { opacity: 1; transform: none; pointer-events: auto; }
 
   .btn {
     appearance: none;
@@ -385,7 +388,7 @@
   .decline-quip.show { opacity: 0.9; }
 
   /* =====================================================
-     SCREEN 3 — self destruct countdown
+     SCREEN 3 - self destruct countdown
      ===================================================== */
   #screen-destruct .stage-inner {
     display: grid;
@@ -472,7 +475,7 @@
   }
 
   /* =====================================================
-     SCREEN 4 — after the blast (fallback link / redirecting)
+     SCREEN 4 - after the blast (fallback link / redirecting)
      ===================================================== */
   .aftermath { text-align: center; }
   .aftermath h2 {
@@ -615,11 +618,11 @@
       <div class="dossier-meta">
         <span>FILE&nbsp;№ MP-2027</span>
         <span>OP: MISSION POSSIBLE</span>
-        <span>WINDOW: 16&ndash;22 JAN 2027</span>
+        <span>WINDOW: 16-22 JAN 2027</span>
       </div>
       <div class="briefing" id="briefing"></div>
 
-      <div class="actions" id="actions">
+      <div class="actions" id="actions" inert>
         <button class="btn btn-accept" id="acceptBtn" type="button">Accept Mission</button>
         <button class="btn btn-decline" id="declineBtn" type="button">Decline</button>
         <p class="decline-quip" id="declineQuip" aria-live="assertive"></p>
@@ -659,12 +662,12 @@
   "use strict";
 
   /* ============================================================
-     CONFIG  —  EDIT THESE TWO VALUES
+     CONFIG  -  EDIT THESE TWO VALUES
      ============================================================
      1) GOOGLE_FORM_URL
         Paste your Google Form link between the quotes.
         While it is left as the placeholder below, the page will NOT
-        redirect — instead it shows a visible, clickable link so you
+        redirect - instead it shows a visible, clickable link so you
         can test the whole experience without a real form.
         Once you paste a real https:// URL, it redirects automatically.
 
@@ -701,7 +704,7 @@
   }
 
   /* ============================================================
-     SOUND  —  no autoplay. AudioContext is only created on the
+     SOUND  -  no autoplay. AudioContext is only created on the
      first user tap. A mute toggle is always offered.
      ============================================================ */
   const audio = {
@@ -799,7 +802,7 @@
     "Good evening, Agent.\n\n",
     "Your mission, should you choose to accept it, is to join us at ",
     { accent: "MISSION POSSIBLE 2027" },
-    " — 16 to 22 January 2027.\n\n",
+    " - 16 to 22 January 2027.\n\n",
     "Expect bold ideas, trusted allies, and an operation unlike any other. ",
     "Your presence is mission-critical.\n\n",
     "As always, should you be caught hesitating, we will simply ask again."
@@ -876,6 +879,7 @@
   }
 
   function revealActions() {
+    actionsEl.removeAttribute("inert");   // now interactive + focusable
     actionsEl.classList.add("is-revealed");
     $("acceptBtn").focus({ preventScroll: true });
   }
@@ -897,7 +901,7 @@
 
   function dodgeDecline() {
     if (prefersReducedMotion) {
-      // No jumping for reduced-motion users — just refuse politely.
+      // No jumping for reduced-motion users - just refuse politely.
       declineQuip.textContent = QUIPS[quipIndex % QUIPS.length];
       declineQuip.classList.add("show");
       quipIndex++;
