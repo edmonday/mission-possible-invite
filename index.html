@@ -767,17 +767,28 @@
     on: false,
     ctx: null,
     master: null,
-    bpm: 92,
+    bpm: 96,
     step: 0,
     nextNoteTime: 0,
     timerId: null,
-    ROOT: 55,    // A1, in Hz
-    STEPS: 20,   // 20 sixteenths = a 5/4 bar, grouped 3+3+2+2 for that restless spy drive
-    // Values are semitones above the root; null = rest. This is an ORIGINAL line
-    // written to evoke the genre's urgency, not a transcription of any real theme.
-    bass:  [0, null, 0, null, 0, null, 0, null, 0, null, 3, null, 0, null, 0, null, 5, null, 3, null],
-    lead:  [12, null, null, null, 15, null, 14, null, null, null, 12, null, 17, null, 18, null, 14, null, 12, null],
-    hats:  [true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false],
+    ROOT: 55,        // A1, in Hz
+    STEPS: 20,       // sixteenths per 5/4 bar (grouped 3+3+2+2 for that restless drive)
+    // A 4-bar ORIGINAL progression (Am - F - G - E) so the loop develops over ~10s
+    // instead of repeating every bar. Semitone offsets from ROOT; null = rest.
+    // Written to evoke the genre's urgency, not a transcription of any real theme.
+    barRoots: [0, 8, 10, 7],
+    stabAt: [0, 12],   // chord-stab accents within each bar
+    // driving bass groove, relative to each bar's root (octave jumps for energy)
+    bassGroove: [0, null, 0, null, 12, null, 0, null, 0, null, 7, null, 0, null, 12, null, 0, null, 7, null],
+    // hats with a few 16th ghost-notes for drive
+    hats: [true, false, true, true, true, false, true, false, true, true, true, false, true, false, true, true, true, false, true, false],
+    // 4-bar lead melody (absolute semitones from ROOT), building to a peak in bar 4
+    lead: [].concat(
+      [31, null, null, null, 36, null, 34, null, null, null, 31, null, null, null, 27, null, 29, null, 31, null], // bar 1 (Am)
+      [32, null, null, null, 36, null, 39, null, null, null, 36, null, null, null, 32, null, 31, null, 29, null], // bar 2 (F)
+      [34, null, 36, null, 38, null, 39, null, 41, null, 39, null, 38, null, 36, null, 34, null, 38, null],       // bar 3 (G)
+      [43, null, null, null, 41, null, 39, null, null, null, 35, null, 38, null, 35, null, 31, null, null, null]  // bar 4 (E, w/ G#)
+    ),
 
     freq(semi) { return this.ROOT * Math.pow(2, semi / 12); },
 
@@ -806,15 +817,33 @@
       while (this.nextNoteTime < this.ctx.currentTime + 0.12) {
         this.playStep(this.step, this.nextNoteTime);
         this.nextNoteTime += sixteenth;
-        this.step = (this.step + 1) % this.STEPS;
+        this.step = (this.step + 1) % (this.STEPS * this.barRoots.length);
       }
       this.timerId = setTimeout(() => this.scheduler(), 25);
     },
 
     playStep(i, t) {
-      if (this.bass[i] !== null) this.playBass(this.freq(this.bass[i]), t);
-      if (this.lead[i] !== null) this.playLead(this.freq(this.lead[i] + 24), t);
-      if (this.hats[i]) this.playHat(t);
+      const local = i % this.STEPS;
+      const root = this.barRoots[Math.floor(i / this.STEPS)];
+      if (this.bassGroove[local] !== null) this.playBass(this.freq(root + this.bassGroove[local]), t);
+      if (this.lead[i] !== null) this.playLead(this.freq(this.lead[i]), t);
+      if (this.hats[local]) this.playHat(t);
+      if (this.stabAt.indexOf(local) !== -1) this.playStab(root, t);
+    },
+
+    playStab(rootSemi, t) {
+      // punchy power-chord hit on the bar accents (root + fifth + octave)
+      [12, 19, 24].forEach((semi) => {
+        const o = this.ctx.createOscillator();
+        const g = this.ctx.createGain();
+        o.type = "sawtooth";
+        o.frequency.setValueAtTime(this.freq(rootSemi + semi), t);
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(0.16, t + 0.006);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.24);
+        o.connect(g).connect(this.master);
+        o.start(t); o.stop(t + 0.26);
+      });
     },
 
     playBass(freq, t) {
