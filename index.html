@@ -767,16 +767,17 @@
     on: false,
     ctx: null,
     master: null,
-    bpm: 100,
+    bpm: 92,
     step: 0,
     nextNoteTime: 0,
     timerId: null,
-    ROOT: 55, // A1, in Hz
-    // 16 sixteenth-note steps. Values are semitones above the root; null = rest.
-    // This is an original pattern, not a transcription of any existing theme.
-    bass:  [0, null, 0, 0, 7, null, 0, 3, 0, null, 0, 0, 5, null, 3, 2],
-    stabs: [null, null, null, null, null, null, null, null, 12, null, null, null, null, null, 15, null],
-    hats:  [true, false, true, true, false, true, true, false, true, false, true, true, false, true, true, false],
+    ROOT: 55,    // A1, in Hz
+    STEPS: 20,   // 20 sixteenths = a 5/4 bar, grouped 3+3+2+2 for that restless spy drive
+    // Values are semitones above the root; null = rest. This is an ORIGINAL line
+    // written to evoke the genre's urgency, not a transcription of any real theme.
+    bass:  [0, null, 0, null, 0, null, 0, null, 0, null, 3, null, 0, null, 0, null, 5, null, 3, null],
+    lead:  [12, null, null, null, 15, null, 14, null, null, null, 12, null, 17, null, 18, null, 14, null, 12, null],
+    hats:  [true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false],
 
     freq(semi) { return this.ROOT * Math.pow(2, semi / 12); },
 
@@ -795,7 +796,7 @@
 
     applyVolume() {
       if (!this.master) return;
-      const target = audio.muted ? 0.0001 : 0.11;
+      const target = audio.muted ? 0.0001 : 0.34;
       this.master.gain.setTargetAtTime(target, this.ctx.currentTime, 0.4);
     },
 
@@ -805,45 +806,53 @@
       while (this.nextNoteTime < this.ctx.currentTime + 0.12) {
         this.playStep(this.step, this.nextNoteTime);
         this.nextNoteTime += sixteenth;
-        this.step = (this.step + 1) % 16;
+        this.step = (this.step + 1) % this.STEPS;
       }
       this.timerId = setTimeout(() => this.scheduler(), 25);
     },
 
     playStep(i, t) {
       if (this.bass[i] !== null) this.playBass(this.freq(this.bass[i]), t);
-      if (this.stabs[i] !== null) this.playStab(this.freq(this.stabs[i] + 24), t);
+      if (this.lead[i] !== null) this.playLead(this.freq(this.lead[i] + 24), t);
       if (this.hats[i]) this.playHat(t);
     },
 
     playBass(freq, t) {
+      // two detuned saws for a fatter, more present low end
+      const f = this.ctx.createBiquadFilter();
+      const g = this.ctx.createGain();
+      f.type = "lowpass";
+      f.frequency.setValueAtTime(620, t);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.85, t + 0.008);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.17);
+      g.connect(f).connect(this.master);
+      [-6, 6].forEach((cents) => {
+        const o = this.ctx.createOscillator();
+        o.type = "sawtooth";
+        o.frequency.setValueAtTime(freq, t);
+        o.detune.setValueAtTime(cents, t);
+        o.connect(g);
+        o.start(t); o.stop(t + 0.22);
+      });
+    },
+
+    playLead(freq, t) {
+      // twangy surf-spy lead: a plucked saw with a quick downward bend
       const o = this.ctx.createOscillator();
       const g = this.ctx.createGain();
       const f = this.ctx.createBiquadFilter();
       o.type = "sawtooth";
-      o.frequency.setValueAtTime(freq, t);
+      o.frequency.setValueAtTime(freq * 1.012, t);
+      o.frequency.exponentialRampToValueAtTime(freq, t + 0.06);   // the "twang" bend
       f.type = "lowpass";
-      f.frequency.setValueAtTime(430, t);
+      f.frequency.setValueAtTime(2600, t);
+      f.frequency.exponentialRampToValueAtTime(900, t + 0.3);
       g.gain.setValueAtTime(0.0001, t);
-      g.gain.exponentialRampToValueAtTime(0.65, t + 0.01);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
+      g.gain.exponentialRampToValueAtTime(0.5, t + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.33);
       o.connect(f).connect(g).connect(this.master);
-      o.start(t); o.stop(t + 0.2);
-    },
-
-    playStab(freq, t) {
-      // short minor cluster for suspense
-      [0, 3, 7].forEach((semi) => {
-        const o = this.ctx.createOscillator();
-        const g = this.ctx.createGain();
-        o.type = "square";
-        o.frequency.setValueAtTime(freq * Math.pow(2, semi / 12), t);
-        g.gain.setValueAtTime(0.0001, t);
-        g.gain.exponentialRampToValueAtTime(0.12, t + 0.005);
-        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
-        o.connect(g).connect(this.master);
-        o.start(t); o.stop(t + 0.2);
-      });
+      o.start(t); o.stop(t + 0.36);
     },
 
     playHat(t) {
