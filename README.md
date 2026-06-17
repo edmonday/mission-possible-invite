@@ -41,7 +41,7 @@ const CONFIG = {
 
 ## Hosting
 
-Deployed to GitHub Pages from `main` via the workflow in
-`.github/workflows/deploy-pages.yml`.
+Served by GitHub Pages from the `main` branch root (Settings → Pages →
+"Deploy from a branch" → `main` / `/`).
 
 Live: https://edmonday.github.io/mission-possible-invite/
