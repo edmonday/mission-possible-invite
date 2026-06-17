@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#0d0b08" />
+<title>Mission Possible 2027 — Your Mission Briefing</title>
+<meta name="description" content="A classified briefing for Mission Possible 2027 (16–22 January 2027). Tap to open." />
+
+<!-- Google Fonts (only external dependency) -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;700&family=Share+Tech+Mono&family=Special+Elite&display=swap" rel="stylesheet" />
+
+<style>
+  /* ============================================================
+     MISSION POSSIBLE 2027 — single-file spy briefing
+     ============================================================ */
+
+  :root {
+    --paper: #e9e1cf;
+    --paper-shade: #d8cdb2;
+    --ink: #211c14;
+    --ink-soft: #4a4031;
+    --gold: #c9a04a;
+    --gold-bright: #ecc466;
+    --wax: #8e1d1d;
+    --wax-dark: #5e1212;
+    --classified: #b21f1f;
+    --bg-0: #0d0b08;
+    --bg-1: #161109;
+    --tape: rgba(190, 170, 120, 0.55);
+    --focus: #57d1ff;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body { height: 100%; }
+
+  body {
+    margin: 0;
+    min-height: 100svh;
+    background:
+      radial-gradient(120% 90% at 50% -10%, #1d160b 0%, var(--bg-1) 40%, var(--bg-0) 100%);
+    color: var(--paper);
+    font-family: "Saira Condensed", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* faint moving "surveillance" grid */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(201, 160, 74, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(201, 160, 74, 0.05) 1px, transparent 1px);
+    background-size: 44px 44px;
+    pointer-events: none;
+    z-index: 0;
+    mask-image: radial-gradient(120% 100% at 50% 30%, #000 30%, transparent 85%);
+  }
+
+  .stage {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(1rem, 4vw, 2.5rem);
+    width: 100%;
+    max-width: 720px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .eyebrow {
+    font-family: "Share Tech Mono", monospace;
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+    font-size: clamp(0.62rem, 2.6vw, 0.8rem);
+    color: var(--gold);
+    opacity: 0.85;
+  }
+
+  /* ---------- screen helpers ---------- */
+  .screen { display: none; width: 100%; }
+  .screen.is-active { display: block; animation: fadeIn 0.5s ease both; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  .visually-hidden {
+    position: absolute !important;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0);
+    white-space: nowrap; border: 0;
+  }
+
+  /* =====================================================
+     SCREEN 1 — sealed envelope
+     ===================================================== */
+  .tap-hint {
+    margin-top: 1.6rem;
+    font-family: "Share Tech Mono", monospace;
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    animation: pulse 1.8s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+  .envelope-btn {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    padding: 0;
+    cursor: pointer;
+    display: inline-block;
+    perspective: 1400px;
+    border-radius: 10px;
+  }
+
+  .envelope {
+    position: relative;
+    width: min(86vw, 420px);
+    aspect-ratio: 3 / 2;
+    margin: 0 auto;
+    filter: drop-shadow(0 26px 40px rgba(0,0,0,0.6));
+    transition: transform 0.45s ease;
+  }
+  .envelope-btn:hover .envelope { transform: translateY(-4px) rotate(-0.4deg); }
+
+  .env-body {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(150deg, var(--paper) 0%, var(--paper-shade) 100%);
+    border-radius: 8px;
+    box-shadow: inset 0 0 0 1px rgba(33,28,20,0.25), inset 0 0 60px rgba(94,80,50,0.25);
+  }
+  /* the two lower diagonal seams */
+  .env-body::before,
+  .env-body::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    width: 56%;
+    height: 100%;
+    border-bottom: 1px solid rgba(33,28,20,0.18);
+  }
+  .env-body::before { left: 0; transform-origin: bottom left; transform: skewX(31deg); border-right: 1px solid rgba(33,28,20,0.12); }
+  .env-body::after  { right: 0; transform-origin: bottom right; transform: skewX(-31deg); border-left: 1px solid rgba(33,28,20,0.12); }
+
+  .env-address {
+    position: absolute;
+    left: 9%;
+    bottom: 12%;
+    text-align: left;
+    font-family: "Share Tech Mono", monospace;
+    color: var(--ink-soft);
+    z-index: 2;
+    line-height: 1.45;
+  }
+  .env-address .to { font-size: clamp(0.6rem, 2.6vw, 0.72rem); letter-spacing: 0.18em; opacity: 0.7; }
+  .env-address .name { font-size: clamp(0.8rem, 3.6vw, 1.05rem); letter-spacing: 0.06em; color: var(--ink); }
+  .env-stamp {
+    position: absolute;
+    top: 8%;
+    right: 8%;
+    font-family: "Share Tech Mono", monospace;
+    font-size: clamp(0.5rem, 2.4vw, 0.62rem);
+    letter-spacing: 0.12em;
+    color: var(--classified);
+    border: 2px solid var(--classified);
+    padding: 0.18em 0.4em;
+    transform: rotate(9deg);
+    opacity: 0.78;
+    z-index: 2;
+  }
+
+  /* envelope flap */
+  .env-flap {
+    position: absolute;
+    left: 0; top: 0;
+    width: 100%;
+    height: 58%;
+    transform-origin: top center;
+    transform: rotateX(0deg);
+    transition: transform 0.7s cubic-bezier(.5,.05,.2,1);
+    z-index: 5;
+    backface-visibility: hidden;
+  }
+  .env-flap svg { display: block; width: 100%; height: 100%; }
+  .env-flap .flap-fill { fill: var(--paper-shade); stroke: rgba(33,28,20,0.18); stroke-width: 1; }
+
+  /* wax seal sits on the flap join */
+  .wax-seal {
+    position: absolute;
+    top: calc(58% - 34px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    z-index: 6;
+    background:
+      radial-gradient(circle at 36% 32%, #c0413a 0%, var(--wax) 45%, var(--wax-dark) 100%);
+    box-shadow: inset 0 3px 6px rgba(255,255,255,0.18), inset 0 -6px 10px rgba(0,0,0,0.5), 0 4px 8px rgba(0,0,0,0.45);
+    display: grid;
+    place-items: center;
+    transition: transform 0.4s ease, opacity 0.4s ease;
+  }
+  .wax-seal::before {
+    content: "";
+    position: absolute;
+    inset: 5px;
+    border-radius: 50%;
+    border: 1px dashed rgba(0,0,0,0.28);
+  }
+  .wax-seal .mono {
+    font-family: "Saira Condensed", sans-serif;
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: rgba(255, 225, 200, 0.92);
+    text-shadow: 0 1px 1px rgba(0,0,0,0.5);
+    letter-spacing: 0.02em;
+  }
+
+  /* OPEN state (driven by JS adding .is-opening to .envelope) */
+  .envelope.is-opening .env-flap { transform: rotateX(176deg); z-index: 1; }
+  .envelope.is-opening .wax-seal { transform: translateX(-50%) scale(0.6); opacity: 0; }
+
+  /* the letter slides up out of the envelope */
+  .env-letter {
+    position: absolute;
+    left: 6%;
+    right: 6%;
+    bottom: 6%;
+    height: 70%;
+    background: linear-gradient(180deg, #f4eddb, #e7dcc2);
+    border-radius: 4px;
+    transform: translateY(0);
+    opacity: 0;
+    z-index: 3;
+    transition: transform 0.7s ease 0.25s, opacity 0.3s ease 0.25s;
+    box-shadow: 0 -4px 12px rgba(0,0,0,0.2);
+  }
+  .envelope.is-opening .env-letter { transform: translateY(-46%); opacity: 1; }
+
+  /* =====================================================
+     SCREEN 2 — the dossier / briefing
+     ===================================================== */
+  .dossier {
+    position: relative;
+    background:
+      repeating-linear-gradient(0deg, rgba(0,0,0,0.012) 0 2px, transparent 2px 4px),
+      linear-gradient(180deg, #efe7d2 0%, #e4d8bb 100%);
+    color: var(--ink);
+    border-radius: 6px;
+    padding: clamp(1.4rem, 6vw, 2.6rem) clamp(1.2rem, 5vw, 2.4rem) clamp(1.6rem, 5vw, 2.4rem);
+    text-align: left;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.55), inset 0 0 80px rgba(120,95,55,0.18);
+    border: 1px solid rgba(33,28,20,0.18);
+    overflow: hidden;
+  }
+  /* sticky "tape" corners */
+  .dossier::before, .dossier::after {
+    content: "";
+    position: absolute;
+    width: 78px; height: 24px;
+    background: var(--tape);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+  }
+  .dossier::before { top: -10px; left: 18px; transform: rotate(-6deg); }
+  .dossier::after  { top: -10px; right: 18px; transform: rotate(5deg); }
+
+  .stamp-classified {
+    display: inline-block;
+    font-family: "Share Tech Mono", monospace;
+    color: var(--classified);
+    border: 3px double var(--classified);
+    padding: 0.2em 0.7em;
+    letter-spacing: 0.24em;
+    font-size: clamp(0.7rem, 3vw, 0.9rem);
+    text-transform: uppercase;
+    transform: rotate(-3deg);
+    opacity: 0.85;
+    margin-bottom: 1.1rem;
+  }
+
+  .dossier-meta {
+    font-family: "Share Tech Mono", monospace;
+    font-size: clamp(0.62rem, 2.7vw, 0.74rem);
+    color: var(--ink-soft);
+    letter-spacing: 0.08em;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.4rem;
+    border-top: 1px solid rgba(33,28,20,0.2);
+    border-bottom: 1px solid rgba(33,28,20,0.2);
+    padding: 0.6rem 0;
+    margin-bottom: 1.2rem;
+  }
+
+  .briefing {
+    font-family: "Special Elite", "Courier New", monospace;
+    font-size: clamp(1rem, 4.4vw, 1.22rem);
+    line-height: 1.7;
+    min-height: 11.5em; /* reserve space so typewriter doesn't reflow layout */
+    color: #2a2318;
+  }
+  .briefing .accent { color: var(--wax); font-weight: 700; }
+  /* blinking caret element appended during typing */
+  .caret {
+    display: inline-block;
+    width: 0.6ch;
+    margin-left: 1px;
+    background: var(--ink);
+    animation: blink 1s steps(1) infinite;
+    color: transparent;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .actions {
+    margin-top: 1.8rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.9rem;
+    align-items: center;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  .actions.is-revealed { opacity: 1; transform: none; }
+
+  .btn {
+    appearance: none;
+    font-family: "Saira Condensed", sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-size: clamp(0.92rem, 3.6vw, 1.05rem);
+    padding: 0.85em 1.5em;
+    border-radius: 4px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
+  }
+  .btn-accept {
+    background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+    color: #2a1f08;
+    box-shadow: 0 6px 16px rgba(201,160,74,0.4);
+    flex: 1 1 auto;
+    min-width: 180px;
+  }
+  .btn-accept:hover { transform: translateY(-2px); box-shadow: 0 10px 22px rgba(201,160,74,0.5); }
+  .btn-accept:active { transform: translateY(0); }
+
+  .btn-decline {
+    background: transparent;
+    color: var(--ink-soft);
+    border-color: rgba(33,28,20,0.35);
+    position: relative;
+    transition: transform 0.25s cubic-bezier(.2,.8,.2,1), color 0.2s;
+  }
+  .btn-decline:hover { color: var(--ink); }
+
+  .decline-quip {
+    font-family: "Share Tech Mono", monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    color: var(--classified);
+    margin-top: 0.6rem;
+    min-height: 1.1em;
+    width: 100%;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .decline-quip.show { opacity: 0.9; }
+
+  /* =====================================================
+     SCREEN 3 — self destruct countdown
+     ===================================================== */
+  #screen-destruct .stage-inner {
+    display: grid;
+    place-items: center;
+    gap: 1.2rem;
+  }
+  .destruct-label {
+    font-family: "Share Tech Mono", monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: var(--classified);
+    font-size: clamp(0.8rem, 3.6vw, 1.05rem);
+    text-align: center;
+    animation: warn 1s steps(2) infinite;
+  }
+  @keyframes warn { 50% { opacity: 0.45; } }
+
+  .count {
+    font-family: "Share Tech Mono", monospace;
+    font-size: clamp(7rem, 40vw, 16rem);
+    line-height: 0.9;
+    color: var(--gold-bright);
+    text-shadow: 0 0 30px rgba(236,196,102,0.55), 0 0 80px rgba(178,31,31,0.4);
+  }
+  .count.tick { animation: countPop 0.5s ease; }
+  @keyframes countPop {
+    0% { transform: scale(1.6); opacity: 0.2; }
+    60% { transform: scale(0.95); opacity: 1; }
+    100% { transform: scale(1); }
+  }
+
+  .destruct-ring {
+    width: clamp(180px, 60vw, 260px);
+    height: 8px;
+    border-radius: 99px;
+    background: rgba(33,28,20,0.5);
+    overflow: hidden;
+  }
+  .destruct-ring i {
+    display: block;
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, var(--gold), var(--classified));
+    transform-origin: left;
+  }
+
+  /* =====================================================
+     Explosion / flash / shake
+     ===================================================== */
+  .flash {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle, #fff 0%, #ffd27a 30%, #ff7a2a 60%, transparent 75%);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 60;
+  }
+  .flash.boom { animation: boom 0.7s ease forwards; }
+  @keyframes boom {
+    0% { opacity: 0; transform: scale(0.2); }
+    18% { opacity: 1; }
+    100% { opacity: 0; transform: scale(2.4); }
+  }
+  .shake { animation: shake 0.6s cubic-bezier(.36,.07,.19,.97) both; }
+  @keyframes shake {
+    10%, 90% { transform: translate3d(-2px, 1px, 0); }
+    20%, 80% { transform: translate3d(5px, -3px, 0); }
+    30%, 50%, 70% { transform: translate3d(-9px, 4px, 0); }
+    40%, 60% { transform: translate3d(9px, -4px, 0); }
+  }
+  .particles {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 59;
+    overflow: hidden;
+  }
+  .particle {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 10px; height: 10px;
+    border-radius: 2px;
+    will-change: transform, opacity;
+  }
+
+  /* =====================================================
+     SCREEN 4 — after the blast (fallback link / redirecting)
+     ===================================================== */
+  .aftermath { text-align: center; }
+  .aftermath h2 {
+    font-family: "Saira Condensed", sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: clamp(1.4rem, 7vw, 2.2rem);
+    margin: 0.2rem 0 0.4rem;
+    color: var(--gold-bright);
+  }
+  .aftermath p { color: var(--paper); opacity: 0.85; font-size: 1.05rem; }
+  .go-link {
+    display: inline-block;
+    margin-top: 1.4rem;
+    font-family: "Saira Condensed", sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+    color: #2a1f08;
+    padding: 0.9em 1.8em;
+    border-radius: 4px;
+    text-decoration: none;
+    box-shadow: 0 8px 20px rgba(201,160,74,0.4);
+  }
+  .go-link:hover { transform: translateY(-2px); }
+  .placeholder-note {
+    margin-top: 1.4rem;
+    font-family: "Share Tech Mono", monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    color: var(--gold);
+    opacity: 0.7;
+    max-width: 34ch;
+    margin-left: auto; margin-right: auto;
+  }
+
+  /* =====================================================
+     mute toggle (fixed corner)
+     ===================================================== */
+  .mute-toggle {
+    position: fixed;
+    top: max(0.8rem, env(safe-area-inset-top));
+    right: max(0.8rem, env(safe-area-inset-right));
+    z-index: 70;
+    appearance: none;
+    background: rgba(13,11,8,0.65);
+    border: 1px solid rgba(201,160,74,0.4);
+    color: var(--gold);
+    font-family: "Share Tech Mono", monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    padding: 0.5em 0.7em;
+    border-radius: 999px;
+    cursor: pointer;
+    display: none; /* shown once audio is available */
+    align-items: center;
+    gap: 0.4em;
+    backdrop-filter: blur(4px);
+  }
+  .mute-toggle.is-visible { display: inline-flex; }
+  .mute-toggle:hover { border-color: var(--gold-bright); color: var(--gold-bright); }
+
+  .footer-credit {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    font-family: "Share Tech Mono", monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.16em;
+    color: rgba(201,160,74,0.45);
+    padding: 0.8rem 1rem max(0.8rem, env(safe-area-inset-bottom));
+    text-transform: uppercase;
+  }
+
+  /* =====================================================
+     Focus visibility (keyboard users)
+     ===================================================== */
+  :focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  /* =====================================================
+     Reduced motion: kill shaking / strobing / big movement
+     ===================================================== */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+    .env-flap { transition: none; }
+    .shake { animation: none !important; }
+    .flash { display: none !important; }
+    .tap-hint { opacity: 0.9; }
+    .destruct-label, .count.tick { animation: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- mute / sound toggle (revealed only after first user tap, never autoplays) -->
+<button id="muteToggle" class="mute-toggle" type="button" aria-pressed="false" aria-label="Mute sound">
+  <span aria-hidden="true" id="muteIcon">&#128266;</span><span>SOUND</span>
+</button>
+
+<main class="stage" id="stage">
+
+  <!-- ============ SCREEN 1: sealed envelope ============ -->
+  <section class="screen is-active" id="screen-envelope" aria-label="Sealed envelope">
+    <p class="eyebrow">Incoming // Eyes Only</p>
+    <button class="envelope-btn" id="envelopeBtn" type="button" aria-label="Open your classified briefing">
+      <div class="envelope" id="envelope">
+        <div class="env-body">
+          <div class="env-stamp">TOP&nbsp;SECRET</div>
+          <div class="env-address">
+            <div class="to">TO THE ATTENTION OF AGENT:</div>
+            <div class="name">&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</div>
+          </div>
+        </div>
+        <div class="env-letter" aria-hidden="true"></div>
+        <div class="env-flap" aria-hidden="true">
+          <svg viewBox="0 0 300 116" preserveAspectRatio="none">
+            <polygon class="flap-fill" points="0,0 300,0 150,112" />
+          </svg>
+        </div>
+        <div class="wax-seal" aria-hidden="true"><span class="mono">MP</span></div>
+      </div>
+    </button>
+    <p class="tap-hint" id="tapHint">Tap the seal to open</p>
+  </section>
+
+  <!-- ============ SCREEN 2: the briefing ============ -->
+  <section class="screen" id="screen-briefing" aria-label="Mission briefing" aria-live="polite">
+    <article class="dossier">
+      <span class="stamp-classified">Classified</span>
+      <div class="dossier-meta">
+        <span>FILE&nbsp;№ MP-2027</span>
+        <span>OP: MISSION POSSIBLE</span>
+        <span>WINDOW: 16&ndash;22 JAN 2027</span>
+      </div>
+      <div class="briefing" id="briefing"></div>
+
+      <div class="actions" id="actions">
+        <button class="btn btn-accept" id="acceptBtn" type="button">Accept Mission</button>
+        <button class="btn btn-decline" id="declineBtn" type="button">Decline</button>
+        <p class="decline-quip" id="declineQuip" aria-live="assertive"></p>
+      </div>
+    </article>
+  </section>
+
+  <!-- ============ SCREEN 3: self destruct ============ -->
+  <section class="screen" id="screen-destruct" aria-label="Self destruct sequence">
+    <div class="stage-inner">
+      <p class="destruct-label">This message will self-destruct in</p>
+      <div class="count" id="count" role="timer" aria-live="assertive">5</div>
+      <div class="destruct-ring" aria-hidden="true"><i id="ringFill"></i></div>
+    </div>
+  </section>
+
+  <!-- ============ SCREEN 4: aftermath / link ============ -->
+  <section class="screen" id="screen-after" aria-label="Mission accepted">
+    <div class="aftermath">
+      <p class="eyebrow">Transmission terminated</p>
+      <h2>Mission Accepted</h2>
+      <p id="afterText">Routing you to your registration dossier&hellip;</p>
+      <a class="go-link" id="goLink" href="#" rel="noopener" hidden>Proceed to Registration</a>
+      <p class="placeholder-note" id="placeholderNote" hidden></p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer-credit">Mission Possible 2027 &middot; This briefing is for your eyes only</footer>
+
+<!-- explosion layers -->
+<div class="flash" id="flash" aria-hidden="true"></div>
+<div class="particles" id="particles" aria-hidden="true"></div>
+
+<script>
+  "use strict";
+
+  /* ============================================================
+     CONFIG  —  EDIT THESE TWO VALUES
+     ============================================================
+     1) GOOGLE_FORM_URL
+        Paste your Google Form link between the quotes.
+        While it is left as the placeholder below, the page will NOT
+        redirect — instead it shows a visible, clickable link so you
+        can test the whole experience without a real form.
+        Once you paste a real https:// URL, it redirects automatically.
+
+     2) COUNTDOWN_START
+        The number the "self-destruct" countdown starts from.
+     ============================================================ */
+  const CONFIG = {
+    GOOGLE_FORM_URL: "PASTE_GOOGLE_FORM_URL_HERE",
+    COUNTDOWN_START: 5
+  };
+  /* ============================================================ */
+
+  // A real URL is anything that starts with http(s) and isn't the placeholder.
+  const FORM_URL_IS_SET =
+    typeof CONFIG.GOOGLE_FORM_URL === "string" &&
+    /^https?:\/\//i.test(CONFIG.GOOGLE_FORM_URL) &&
+    CONFIG.GOOGLE_FORM_URL.trim() !== "PASTE_GOOGLE_FORM_URL_HERE";
+
+  const prefersReducedMotion =
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // ---- element refs ----
+  const $ = (id) => document.getElementById(id);
+  const screens = {
+    envelope: $("screen-envelope"),
+    briefing: $("screen-briefing"),
+    destruct: $("screen-destruct"),
+    after: $("screen-after")
+  };
+
+  function showScreen(name) {
+    Object.values(screens).forEach((s) => s.classList.remove("is-active"));
+    screens[name].classList.add("is-active");
+  }
+
+  /* ============================================================
+     SOUND  —  no autoplay. AudioContext is only created on the
+     first user tap. A mute toggle is always offered.
+     ============================================================ */
+  const audio = {
+    ctx: null,
+    muted: false,
+    init() {
+      if (this.ctx) return;
+      try {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return;
+        this.ctx = new AC();
+        $("muteToggle").classList.add("is-visible");
+      } catch (e) { /* audio simply unavailable */ }
+    },
+    tone({ freq = 440, dur = 0.12, type = "sine", gain = 0.18, slideTo = null } = {}) {
+      if (!this.ctx || this.muted) return;
+      const t = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const g = this.ctx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, t);
+      if (slideTo) osc.frequency.exponentialRampToValueAtTime(slideTo, t + dur);
+      g.gain.setValueAtTime(gain, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      osc.connect(g).connect(this.ctx.destination);
+      osc.start(t);
+      osc.stop(t + dur + 0.02);
+    },
+    beep() { this.tone({ freq: 880, dur: 0.09, type: "square", gain: 0.08 }); },
+    whoosh() { this.tone({ freq: 320, slideTo: 90, dur: 0.5, type: "sawtooth", gain: 0.1 }); },
+    boom() {
+      if (!this.ctx || this.muted) return;
+      // noise burst for the explosion
+      const t = this.ctx.currentTime;
+      const len = this.ctx.sampleRate * 0.6;
+      const buffer = this.ctx.createBuffer(1, len, this.ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < len; i++) data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2);
+      const src = this.ctx.createBufferSource();
+      src.buffer = buffer;
+      const g = this.ctx.createGain();
+      g.gain.setValueAtTime(0.5, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.6);
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = "lowpass";
+      filter.frequency.setValueAtTime(800, t);
+      src.connect(filter).connect(g).connect(this.ctx.destination);
+      src.start(t);
+      this.tone({ freq: 120, slideTo: 40, dur: 0.5, type: "sine", gain: 0.3 });
+    }
+  };
+
+  const muteToggle = $("muteToggle");
+  muteToggle.addEventListener("click", () => {
+    audio.muted = !audio.muted;
+    muteToggle.setAttribute("aria-pressed", String(audio.muted));
+    muteToggle.setAttribute("aria-label", audio.muted ? "Unmute sound" : "Mute sound");
+    $("muteIcon").innerHTML = audio.muted ? "&#128263;" : "&#128266;";
+    if (audio.ctx && audio.ctx.state === "suspended") audio.ctx.resume();
+  });
+
+  /* ============================================================
+     SCREEN 1 -> 2 : open the envelope
+     ============================================================ */
+  const envelope = $("envelope");
+  const envelopeBtn = $("envelopeBtn");
+  let opened = false;
+
+  function openEnvelope() {
+    if (opened) return;
+    opened = true;
+    audio.init();               // first user gesture -> safe to enable audio
+    if (audio.ctx && audio.ctx.state === "suspended") audio.ctx.resume();
+    audio.whoosh();
+
+    envelope.classList.add("is-opening");
+    $("tapHint").style.display = "none";
+
+    const delay = prefersReducedMotion ? 100 : 850;
+    setTimeout(() => {
+      showScreen("briefing");
+      typeBriefing();
+    }, delay);
+  }
+  envelopeBtn.addEventListener("click", openEnvelope);
+
+  /* ============================================================
+     SCREEN 2 : typewriter briefing
+     ============================================================ */
+  const briefingEl = $("briefing");
+  const actionsEl = $("actions");
+
+  // The briefing text. Segments marked {accent:...} render in red.
+  const BRIEFING = [
+    "Good evening, Agent.\n\n",
+    "Your mission, should you choose to accept it, is to join us at ",
+    { accent: "MISSION POSSIBLE 2027" },
+    " — 16 to 22 January 2027.\n\n",
+    "Expect bold ideas, trusted allies, and an operation unlike any other. ",
+    "Your presence is mission-critical.\n\n",
+    "As always, should you be caught hesitating, we will simply ask again."
+  ];
+
+  function typeBriefing() {
+    briefingEl.innerHTML = "";
+    const caret = document.createElement("span");
+    caret.className = "caret";
+    caret.textContent = ".";
+    briefingEl.appendChild(caret);
+
+    // Reduced motion: render instantly, skip the per-character animation.
+    if (prefersReducedMotion) {
+      renderInstant();
+      caret.remove();
+      revealActions();
+      return;
+    }
+
+    let seg = 0, ch = 0;
+    let current = document.createTextNode("");
+    briefingEl.insertBefore(current, caret);
+
+    function step() {
+      if (seg >= BRIEFING.length) {
+        caret.remove();
+        revealActions();
+        return;
+      }
+      const piece = BRIEFING[seg];
+      if (typeof piece === "object") {
+        // accent chunk: type it inside a styled span
+        const span = document.createElement("span");
+        span.className = "accent";
+        briefingEl.insertBefore(span, caret);
+        let i = 0;
+        const txt = piece.accent;
+        const accentTimer = setInterval(() => {
+          span.textContent += txt[i];
+          if (i % 2 === 0) audio.beep();
+          i++;
+          if (i >= txt.length) {
+            clearInterval(accentTimer);
+            seg++;
+            current = document.createTextNode("");
+            briefingEl.insertBefore(current, caret);
+            setTimeout(step, 30);
+          }
+        }, 45);
+        return;
+      }
+      // plain text chunk
+      current.textContent += piece[ch];
+      if (piece[ch] !== "\n" && piece[ch] !== " " && ch % 2 === 0) audio.beep();
+      ch++;
+      if (ch >= piece.length) { seg++; ch = 0; current = document.createTextNode(""); briefingEl.insertBefore(current, caret); }
+      setTimeout(step, piece[ch - 1] === "\n" ? 90 : 24);
+    }
+    step();
+  }
+
+  function renderInstant() {
+    BRIEFING.forEach((piece) => {
+      if (typeof piece === "object") {
+        const span = document.createElement("span");
+        span.className = "accent";
+        span.textContent = piece.accent;
+        briefingEl.appendChild(span);
+      } else {
+        briefingEl.appendChild(document.createTextNode(piece));
+      }
+    });
+  }
+
+  function revealActions() {
+    actionsEl.classList.add("is-revealed");
+    $("acceptBtn").focus({ preventScroll: true });
+  }
+
+  /* ============================================================
+     SCREEN 2 : the playful Decline button
+     ============================================================ */
+  const declineBtn = $("declineBtn");
+  const declineQuip = $("declineQuip");
+  const QUIPS = [
+    "Declining is not an option, Agent.",
+    "This button has been classified.",
+    "Nice try. The mission chooses you.",
+    "Error 403: Cold feet not authorized.",
+    "Resistance is... inadvisable.",
+    "We knew you'd try that."
+  ];
+  let quipIndex = 0;
+
+  function dodgeDecline() {
+    if (prefersReducedMotion) {
+      // No jumping for reduced-motion users — just refuse politely.
+      declineQuip.textContent = QUIPS[quipIndex % QUIPS.length];
+      declineQuip.classList.add("show");
+      quipIndex++;
+      return;
+    }
+    const maxX = Math.min(120, window.innerWidth * 0.18);
+    const x = (Math.random() * 2 - 1) * maxX;
+    const y = (Math.random() * 2 - 1) * 24;
+    declineBtn.style.transform = `translate(${x}px, ${y}px) rotate(${x / 20}deg)`;
+    declineQuip.textContent = QUIPS[quipIndex % QUIPS.length];
+    declineQuip.classList.add("show");
+    quipIndex++;
+    audio.beep();
+  }
+  // Dodge on hover (desktop) and on any click/tap attempt.
+  declineBtn.addEventListener("mouseenter", dodgeDecline);
+  declineBtn.addEventListener("focus", dodgeDecline);
+  declineBtn.addEventListener("click", (e) => { e.preventDefault(); dodgeDecline(); });
+
+  /* ============================================================
+     SCREEN 2 -> 3 : accept -> countdown
+     ============================================================ */
+  $("acceptBtn").addEventListener("click", () => {
+    if (audio.ctx && audio.ctx.state === "suspended") audio.ctx.resume();
+    showScreen("destruct");
+    runCountdown();
+  });
+
+  /* ============================================================
+     SCREEN 3 : countdown
+     ============================================================ */
+  const countEl = $("count");
+  const ringFill = $("ringFill");
+
+  function runCountdown() {
+    let n = Math.max(1, parseInt(CONFIG.COUNTDOWN_START, 10) || 5);
+    const total = n;
+    countEl.textContent = n;
+    ringFill.style.transition = "none";
+    ringFill.style.transform = "scaleX(1)";
+
+    const tick = () => {
+      countEl.textContent = n;
+      countEl.classList.remove("tick");
+      void countEl.offsetWidth;        // restart animation
+      countEl.classList.add("tick");
+      audio.tone({ freq: 660, dur: 0.12, type: "square", gain: 0.12 });
+
+      ringFill.style.transition = "transform 1s linear";
+      ringFill.style.transform = `scaleX(${(n - 1) / total})`;
+
+      n--;
+      if (n < 0) {
+        detonate();
+        return;
+      }
+      setTimeout(tick, 1000);
+    };
+    tick();
+  }
+
+  /* ============================================================
+     Explosion, then hand off to the form
+     ============================================================ */
+  function detonate() {
+    audio.boom();
+
+    if (!prefersReducedMotion) {
+      const flash = $("flash");
+      flash.classList.add("boom");
+      document.getElementById("stage").classList.add("shake");
+      spawnParticles();
+    }
+
+    const wait = prefersReducedMotion ? 200 : 900;
+    setTimeout(handoff, wait);
+  }
+
+  function spawnParticles() {
+    const layer = $("particles");
+    const colors = ["#ffd27a", "#ff7a2a", "#ffffff", "#c9a04a", "#b21f1f"];
+    const count = 36;
+    for (let i = 0; i < count; i++) {
+      const p = document.createElement("span");
+      p.className = "particle";
+      p.style.background = colors[i % colors.length];
+      layer.appendChild(p);
+      const angle = (Math.PI * 2 * i) / count + Math.random() * 0.5;
+      const dist = 120 + Math.random() * 260;
+      const dx = Math.cos(angle) * dist;
+      const dy = Math.sin(angle) * dist;
+      const rot = (Math.random() * 720 - 360) + "deg";
+      p.animate(
+        [
+          { transform: "translate(-50%,-50%) translate(0,0) rotate(0)", opacity: 1 },
+          { transform: `translate(-50%,-50%) translate(${dx}px, ${dy}px) rotate(${rot})`, opacity: 0 }
+        ],
+        { duration: 700 + Math.random() * 500, easing: "cubic-bezier(.16,.84,.44,1)", fill: "forwards" }
+      );
+    }
+    setTimeout(() => (layer.innerHTML = ""), 1400);
+  }
+
+  function handoff() {
+    document.getElementById("stage").classList.remove("shake");
+    showScreen("after");
+
+    if (FORM_URL_IS_SET) {
+      // Real URL set -> redirect automatically. Also give a manual link
+      // in case the redirect is blocked.
+      const link = $("goLink");
+      link.href = CONFIG.GOOGLE_FORM_URL;
+      link.hidden = false;
+      $("afterText").textContent = "Routing you to your registration dossier…";
+      window.location.href = CONFIG.GOOGLE_FORM_URL;
+    } else {
+      // Placeholder still in place -> show a visible link instead of redirecting,
+      // so the page is fully testable without a real form.
+      const link = $("goLink");
+      link.href = "#";
+      link.hidden = false;
+      link.textContent = "Proceed to Registration (set form URL)";
+      link.addEventListener("click", (e) => e.preventDefault());
+      $("afterText").textContent = "Mission accepted, Agent.";
+      const note = $("placeholderNote");
+      note.hidden = false;
+      note.textContent =
+        "Demo mode: GOOGLE_FORM_URL is still the placeholder, so no redirect happens. Set it in the script to go live.";
+    }
+  }
+</script>
+</body>
+</html>
