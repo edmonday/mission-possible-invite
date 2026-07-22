@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <meta name="theme-color" content="#0d0b08" />
 <title>Mission Possible 2027 - Your Mission Briefing</title>
-<meta name="description" content="A classified briefing for Mission Possible 2027 (16-22 January 2027). Tap to open." />
+<meta name="description" content="A classified briefing for Mission Possible 2027 (18-22 January 2027, Auckland). Tap to open." />
 
 <!-- Google Fonts (only external dependency) -->
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -315,6 +315,7 @@
     line-height: 1.7;
     min-height: 11.5em; /* reserve space so typewriter doesn't reflow layout */
     color: #2a2318;
+    white-space: pre-line; /* honour the line breaks so it reads like a letter */
   }
   .briefing .accent { color: var(--wax); font-weight: 700; }
   /* blinking caret element appended during typing */
@@ -621,7 +622,7 @@
       <div class="dossier-meta">
         <span>FILE&nbsp;№ MP-2027</span>
         <span>OP: MISSION POSSIBLE</span>
-        <span>WINDOW: 16-22 JAN 2027</span>
+        <span>WINDOW: 18-22 JAN 2027</span>
       </div>
       <div class="briefing" id="briefing"></div>
 
@@ -688,7 +689,7 @@
         Background music volume, 0 (silent) to 1 (full).
      ============================================================ */
   const CONFIG = {
-    GOOGLE_FORM_URL: "PASTE_GOOGLE_FORM_URL_HERE",
+    GOOGLE_FORM_URL: "https://forms.gle/xrn7CExibadTGakb6",
     COUNTDOWN_START: 5,
     BACKGROUND_MUSIC_URL: "spy-loop.mp3",
     MUSIC_VOLUME: 0.7
@@ -848,10 +849,10 @@
 
   // The briefing text. Segments marked {accent:...} render in red.
   const BRIEFING = [
-    "Good evening, Agent.\n\n",
+    "Good morning, Agent.\n\n",
     "Your mission, should you choose to accept it, is to join us at ",
     { accent: "MISSION POSSIBLE 2027" },
-    " - 16 to 22 January 2027.\n\n",
+    " - 18 to 22 January 2027 in Auckland.\n\n",
     "Expect bold ideas, trusted allies, and an operation unlike any other. ",
     "Your presence is mission-critical.\n\n",
     "As always, should you be caught hesitating, we will simply ask again."
